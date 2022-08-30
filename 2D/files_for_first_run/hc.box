@@ -1,0 +1,14 @@
+hc.rea
+2                      spatial dimension
+2                      number of fields
+#
+#
+#
+#========================================================
+#
+Box_1                         
+-80 -10                     nel_1, nel_2
+-4.0  4.0  1.0                    x0, x1, x2
+0.0  1.0  1.0                 gain_k, k=1,3
+W  ,W  ,W  ,W            (bc's) velocity 
+I  ,I  ,f  ,t            (bc's) temperature

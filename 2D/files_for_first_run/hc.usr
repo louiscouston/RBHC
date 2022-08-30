@@ -1,0 +1,207 @@
+c-----------------------------------------------------------------------
+      subroutine RB !THIS SETS BASIC PARAMETERS FOR MY PROBLEM
+      include 'SIZE'
+      include 'TOTAL'
+      include 'NEKUSE'
+      common /mypar/ rayl,prandtl,rf,asp,hg,A
+
+c Stretching factor
+      asp = 1.0 
+c Rayleigh number
+      rayl = 1000000.0
+c Prandtl number
+      prandtl = 1.0
+c Horizontal temperature gradient
+      hg = 0.1
+c Aspect ratio
+      A = 8.0 
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine uservp (ix,iy,iz,eg) !variable viscosity and density
+      include 'SIZE'
+      include 'TOTAL'
+      include 'NEKUSE'
+      common /mypar/ rayl,prandtl,rf,asp,hg
+      integer e,f,eg
+
+      call RB
+
+      if(ifield.eq.1)then   ! momentum equation
+         utrans= 1.0
+         udiff = prandtl 
+      else if(ifield.eq.2)then ! temperature eqn
+         utrans= 1.0
+         udiff = 1.0
+      else
+         if(nid.eq.0) write(6,'("Only 2 fields")')
+         call exitt()
+      endif
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine userf  (ix,iy,iz,eg) !forces (explicitly integrated)
+      include 'SIZE'
+      include 'TOTAL'
+      include 'NEKUSE'
+      integer e,f,eg
+      common /mypar/ rayl,prandtl,rf,asp
+
+c ffx is the ACCELERATION in the x direction (multiplied by RHO=1 here)
+      ffx = 0.0 
+      ffy = prandtl*rayl*temp
+      ffz = 0.0
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine userq  (ix,iy,iz,eg)
+      include 'SIZE'
+      include 'TOTAL'      
+      include 'NEKUSE'
+      integer e,f,eg
+      qvol = 0.0 
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine userchk ! called once per step
+      include 'SIZE'
+      include 'TOTAL'
+      parameter(lt=lx1*ly1*lz1*lelv)  
+      common /mypar/ rayl,prandtl,rf,asp
+      common /scrns/ vort(lt,3),w1(lt),w2(lt)
+      integer histstep, n, e
+      real meant,KE,vertvel,vflux,maxt,Z,C
+      integer eg,ex,ey,ez,g,zavgdumpstep
+      n = nx1*ny1*nz1*nelv
+   
+      call RB
+
+c      if (mod(istep,iostep).eq.0) then
+c Compute and output vorticity each iostep to seperate fld files
+c        call comp_vort3(vort,w1,w2,vx,vy,vz)
+c        call outpost(vort(1,3),vort(1,2),vort(1,1),pr,t,'vor')
+c      endif
+
+      histstep = 2 !output history points every histstep timesteps
+      if(mod(istep,histstep) .eq. 0) then
+
+c Average temperature
+       meant = glsc2(t,bm1,n)/volvm1
+
+c Maximum temperature
+       maxt = glmax(t,n)
+ 
+c Kinetic energy density
+       KE = 0.5D0*(glsc3(vx,bm1,vx,n)   
+     $          +glsc3(vy,bm1,vy,n))/volvm1
+
+      vertvel = sqrt(glsc3(vy,bm1,vy,n))/volvm1 !average
+
+c vertical heat flux     
+      vflux = glsc3(vy,bm1,t,n)/volvm1
+
+      call comp_vort3(vort,w1,w2,vx,vy,vz)
+c Enstrophy
+      Z = 0.5D0*(glsc3(vort(1,3),bm1,vort(1,3),n))   
+c Circulation
+      C = glsc2(vort(1,3),bm1,n)   
+
+      if(nid .eq. 0) then !root process
+        write(51,'(8E15.7)') time,meant,maxt,KE,vertvel,vflux,Z,C
+      endif
+ 
+      endif
+
+c------------------------------------------
+c          Save history points
+c------------------------------------------
+      if(mod(istep,1000) .eq. 0) then
+       call hpts()
+      endif
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine userbc (ix,iy,iz,iside,ieg)
+      include 'SIZE'
+      include 'TOTAL'
+      include 'NEKUSE'
+      common /mypar/ rayl,prandtl,rf,asp,hg,A
+      
+      ux = 0.0
+      uy = 0.0
+      uz = 0.0
+
+c Upper and lower temperatures 
+      if(iside.eq.3) then !upper BC
+        temp = hg*(A/2.0)*sin(3.1415926535897932D0*x/A)
+      elseif(iside.eq.1) then !lower BC
+        flux = 1.0
+      endif
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine useric (ix,iy,iz,ieg)
+      include 'SIZE'
+      include 'TOTAL'
+      include 'NEKUSE'
+      common /mypar/ rayl,prandtl,rf,asp,hg,A
+      integer idum
+      save    idum 
+      data    idum / 0 /
+      if (idum.eq.0) idum = 99 + nid
+
+c      eps = 0.001
+      eps = 0.0001
+      ux = 0.0
+      uy = 0.0
+      uz = 0.0
+c      temp = eps*2.0*(ran1(idum)-0.5)
+c      temp = hg*(A/2.0)*sin((3.1415926535897932*x)/A) + (1-y) + eps*2.0000*(ran1(idum)-0.5)
+c      temp = -hg*(A/2.0) + eps*2.0000*(ran1(idum)-0.5)
+c      temp = hg*(A/2.0)*sin((3.1415926535897932*x)/A)*y**2 + (1-y) + eps*2.0000*(ran1(idum)-0.5)
+      temp = hg*(A/2.0)*sin((3.1415926535897932*x)/A)*exp(-40.0*(1.0-y)) + (1.0-y) + eps*2.0000*(ran1(idum)-0.5)
+c      temp = hg*(A/2.0)*(-1*(1-y)+sin((3.1415926535897932*x)/A))*y**2 + (1-y) + eps*2.0000*(ran1(idum)-0.5)
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine usrdat
+      include 'SIZE'
+      include 'TOTAL'
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine usrdat2
+      include 'SIZE'
+      include 'TOTAL'
+      common /mypar/ rayl,prandtl,rf,asp,hg
+      integer n
+      param(66) = 4 !ASCII output
+      param(67) = 4 !ASCII input
+      param(59) = 1 !allows to deform mesh
+
+      call RB
+
+      call fix_geom
+      n=nx1*ny1*nz1*nelt
+      do i=1,n
+c Adjusting aspect ratio
+       x = xm1(i,1,1,1)
+       xm1(i,1,1,1) = x*asp 
+      enddo
+      call fix_geom !moves points back to GLL nodes -- important!
+
+      return
+      end
+c-----------------------------------------------------------------------
+      subroutine usrdat3
+      include 'SIZE'
+      include 'TOTAL'
+      return
+      end
+c-----------------------------------------------------------------------
