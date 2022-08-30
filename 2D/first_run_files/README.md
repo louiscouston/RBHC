@@ -1,6 +1,6 @@
 # Running a simulation from scratch
 
-The files available in this folder currently allow reproducing the run Ra_F=1e6, Lambda=0.1 from the paper, albeit with a shorter simulation time, such that the run shouldn't take longer than a few minutes with the pre-set choice of 8 cores (last checked: 30/08/2022 on PSMN). 
+The files available in this folder currently allow reproducing the run Ra_F=1e6, Lambda=0.1 from the paper, albeit with a shorter simulation time, such that the run shouldn't take longer than a few minutes with the pre-set choice of 8 cores (last checked: 30/08/2022 on PSMN by Louis). 
 
 If you're running on ENS de Lyon supercomputer (PSMN), make sure that you first installed Nek5000 and loaded the required libraries. While on a compute node, I do this running the alias "nek5000", which is set in my .bashrc as "alias nek5000="module load GCC/7.2.0/OpenMPI/3.0.0 GCC/7.2.0"". Note that you may have to go to $home/nek5000/tools/ and run “maketools all”.
 
