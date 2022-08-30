@@ -31,11 +31,15 @@ If you're running on ENS de Lyon supercomputer (PSMN), make sure that you first 
 5. Compile your code and run!
 -> run “makenek hc”
 -> run “nekmpi hc X” with X=#cores
--> run “visnek hc” to prepare hc.fldxxxx files for visualization in VisIt
+-> run “visnek hc” to prepare hc.fldxxxx files for visualization in VisIt (frequence set by iotime in hc.rea)
+-> open VisIt and load the hc.nek5000 file
 
 6. Analyze the results
--> run "fort.py", which post-process the volume-averaged quantities computed on the fly via the hc.usr routine 
-
+-> run "python3 postprocess-fort.py", which post-processes the volume-averaged quantities computed on the fly via the hc.usr routine (creating figure fort.png)
+-> run "./clean.sh", which breaks down hc.his in reduced .dat files
+-> run "python3 generate-data.py", which post-processes the .dat files into .npz files (including reduced files with time averages beyond tsss only)
+-> run "python3 plot-figures.py", which creates figures (snapshots) from bulk.npz
+-> fancier analysis can be run adjusting the python scripts stored in the folder specific_analysis_files (nb: they only work using the folder organization I used personally... and some variables have been renamed... so use with caution!)
 
 
 Running a simulation using pre-compiled files
@@ -44,10 +48,3 @@ Option 1: You only change hc.rea and/or hc.usr. Do step 1, then go directly to s
 Option 2: You also change #cores and/or spectral resolution. Do step 1, then go directly to step 4.
 Option 3: You also change #elements in hc.box. Do all steps again.
 	
-Output
-Option 1: Userchck routine in hc.usr file defines volume averaged variables that are computed and stored at every time step in successive columns in fort.51. The first column shows time.
-Option 2: Variables are saved on the collocation grid used for computations in hc.fld00 files, which are written every time the simulation advances by iotime, which is a parameter that must be set in hc.rea. These files can be used for visualization in VisIt. To do so, run “visnek hc”, open VisIt and load the hc.nek5000 file.
-Option 3: Primitive variables (u,w,T) can be saved on a custom grid as defined in genhpts.f90. To generate the grid, compile genhpts.f90 using “gfortran genhpts.f90” and run the obtained a.out executable using “./a.out”. This will create file fort.66, which should be renamed as hc.his. As the simulation proceeds, the data is ordered as (t,x,z,u,w,T) and appended to hc.his every time the simulation advances by iohis.
-
-Analysis
-Currently, the script fort.py can be used to process the fort.51 data; the script clean.sh can be used to split the hc.his data into bulk and side data by running “./clean.sh”; the data_bulk.dat and data_side.dat can then be further analysed using genDAT.py and sideANALYSIS.py.
