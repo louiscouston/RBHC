@@ -1,17 +1,42 @@
 # Running a simulation from scratch
 
-Running a simulation from scratch
-0. Go to $home/nek5000/tools/ and run “maketools all”
-1. Taylor initial.rea and hc.usr
-2. Taylor hc.box (using initial.rea as input)
-3. Choose a number of #cores to run on
-4. Taylor SIZE, i.e., set spectral resolution (lx1 and lxd=3/2*lx1; typically 8 and 12), set lelg, and ensure that #elements/core lelt = lelg/lp as small as possible, i.e., with lelg = #elements and lp = #cores (min considered); set lhis as small as possible but such that lhis*#cores>#pts in hc.his
-5. Run “genbox”, enter “hc.box” when prompted
-6. Rename box.rea as hc.rea
-7. Run “genmap”, enter “hc” when prompted, press “enter” when prompted for the mesh tolerance. This will generate hc.map, which is used by the parallelization algorithm
-8. Run “makenek hc”
-9. Run “nekmpi hc X” with X=#cores
-10. Run “visnek hc” to prepare hc.fld files for visualization in VisIt
+The files available in this folder currently allow reproducing the run Ra_F=1e6, Lambda=0.1 from the paper, albeit with a shorter simulation time, such that the run shouldn't take longer than a few minutes with the pre-set choice of 8 cores (last checked: 30/08/2022 on PSMN). 
+
+If you're running on ENS de Lyon supercomputer (PSMN), make sure that you first installed Nek5000 and loaded the required libraries. While on a compute node, I do this running the alias "nek5000", which is set in my .bashrc as "alias nek5000="module load GCC/7.2.0/OpenMPI/3.0.0 GCC/7.2.0"". Note that you may have to go to $home/nek5000/tools/ and run “maketools all”.
+
+1. Generate hc.his, i.e., the Eulerian grid (fixed probes) that will be used to evaluate and save dependent variables (t,u,w,p,T)   
+-> taylor genhpts.f90 if you must (pick nxhis, nzhis; nhis=nxhis.nzhis+(nxhis+nzhis).3.2; .=times)
+-> run "gfortran genhpts.f90"
+-> run "./a.out"
+-> run "mv fort.66 hc.his"
+
+2. Generate hc.rea and hc.map
+-> taylor hc.box if you must (pick nx, nz)
+-> run “genbox”, enter “hc.box” when prompted
+-> rename box.rea as hc.rea
+-> run “genmap”, enter “hc” when prompted, press “enter” when prompted for the mesh tolerance.
+
+3. Taylor SIZE based on the choices made above
+-> pick the spectral order lx1, lxd (=3/2lx1)
+-> pick the number of processors lp (the code will also work with more cores but not fewer)
+-> change total number of elements lelg, number elements per core lelt (=lelg/lp), number of probes per core lhis (=nhis/lp) (always using upper integer numbers)
+
+4. Taylor hc.usr, where the physics happen
+-> modify the control parameters if you must, i.e. rayl (Ra_F in the paper), hg (Lambda), A (Gamma)
+-> modify the routine userchk if you must, which sets variables stored in fort.51
+-> modify the block "if(mod(istep,1000) .eq. 0) then; call hpts(); endif" if you want to adjust the number of iterations between two different writes of primitive variables in hc.his
+-> modify the routine userbc if you don't like our sinusoidal temperature forcing along the top boundary
+-> modify useric if you want to change the initial condition
+
+5. Compile your code and run!
+-> run “makenek hc”
+-> run “nekmpi hc X” with X=#cores
+-> run “visnek hc” to prepare hc.fldxxxx files for visualization in VisIt
+
+6. Analyze the results
+-> run "fort.py", which post-process the volume-averaged quantities computed on the fly via the hc.usr routine 
+
+
 
 Running a simulation using pre-compiled files
 Use hc.rea as input in hc.box.
