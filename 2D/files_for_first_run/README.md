@@ -4,13 +4,13 @@ The files available in this folder currently allow reproducing the run Ra_F=1e6,
 
 If you're running on ENS de Lyon supercomputer (PSMN), make sure that you first installed Nek5000 and loaded the required libraries. While on a compute node, I do this running the alias "nek5000", which is set in my .bashrc as "alias nek5000="module load GCC/7.2.0/OpenMPI/3.0.0 GCC/7.2.0"". Note that you may have to go to $home/nek5000/tools/ and run “maketools all”.
 
-1. Generate hc.his, i.e., the Eulerian grid (fixed probes) that will be used to evaluate and save dependent variables (t,u,w,p,T)     
+1. Generate hc.his, i.e., the Eulerian grid (fixed probes) that will be used to evaluate and save dependent variables (t,u,w,p,T)
 - taylor genhpts.f90 if you must (pick nxhis, nzhis; nhis=nxhis.nzhis+(nxhis+nzhis).3.2; .=times)  
 - run "gfortran genhpts.f90"  
 - run "./a.out"  
 - run "mv fort.66 hc.his"  
 
-2. Generate hc.rea and hc.map  
+2. Generate hc.rea and hc.map
 - taylor hc.box if you must (pick nx, nz)  
 - run “genbox”, enter “hc.box” when prompted  
 - rename box.rea as hc.rea  
