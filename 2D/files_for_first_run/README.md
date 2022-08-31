@@ -1,6 +1,6 @@
 # Instructions
 
-## Running your first simulation from scratch
+## Running your first simulation
 
 The files available in this folder currently allow reproducing the run Ra_F=1e6, Lambda=0.1 from the paper, albeit with a shorter simulation time, such that the run shouldn't take longer than a few minutes with the pre-set choice of 8 cores (last checked: 30/08/2022 on PSMN by Louis). 
 
@@ -43,6 +43,8 @@ If you're running on ENS de Lyon supercomputer (PSMN), make sure that you first 
 - run "python3 plot-figures.py", which creates figures (snapshots) from bulk.npz  
 - fancier analysis (as reported in the paper) can be run adjusting the python scripts stored in the folder specific_analysis_files (nb: they only work using the folder organization I used personally... and some variables have been renamed... so use with caution!)  
 
+
+## Changing a handful of parameters after having run your first simulation
 
 Running a simulation using pre-compiled files  
 Use hc.rea as input in hc.box.  
