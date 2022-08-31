@@ -46,6 +46,9 @@ If you're running on ENS de Lyon supercomputer (PSMN), make sure that you first 
 
 ## Changing a handful of parameters after having run your first simulation
 
+- If you want to change the number of elements in hc.box (besides other things), then you have to follow all steps listed above
+- If you are happy with the number of elements
+
 Running a simulation using pre-compiled files  
 Use hc.rea as input in hc.box.  
 Option 1: You only change hc.rea and/or hc.usr. Do step 1, then go directly to step 8.  
