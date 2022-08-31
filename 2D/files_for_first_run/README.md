@@ -1,4 +1,6 @@
-# Running your first simulation from scratch
+# Instructions
+
+## Running your first simulation from scratch
 
 The files available in this folder currently allow reproducing the run Ra_F=1e6, Lambda=0.1 from the paper, albeit with a shorter simulation time, such that the run shouldn't take longer than a few minutes with the pre-set choice of 8 cores (last checked: 30/08/2022 on PSMN by Louis). 
 
