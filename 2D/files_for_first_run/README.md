@@ -41,7 +41,7 @@ If you're running on ENS de Lyon supercomputer (PSMN), make sure that you first 
 - run "./clean.sh", which breaks down hc.his in reduced .dat files  
 - run "python3 generate-data.py", which post-processes the .dat files into .npz files (including reduced files with time averages beyond tsss only)  
 - run "python3 plot-figures.py", which creates figures (snapshots) from bulk.npz  
-- fancier analysis (as reported in the paper) can be run adjusting the python scripts stored in the folder specific_analysis_files (nb: they only work using the folder organization I used personally... and some variables have been renamed... so use with caution!)  
+- fancier analysis (as reported in the paper) can be run adjusting the python scripts stored in the folder all_analysis_scripts (nb: they only work using the folder organization I used personally... and some variables have been renamed... so use with caution!)  
 
 
 ## Changing a handful of parameters after having run your first simulation
